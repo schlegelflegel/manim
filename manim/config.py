@@ -57,6 +57,14 @@ def _parse_config(config_parser, args):
         background_color = colour.Color(default["background_color"])
     config["background_color"] = background_color
 
+    config["use_js_renderer"] = args.use_js_renderer or default.getboolean(
+        "use_js_renderer"
+    )
+
+    config["js_renderer_path"] = args.js_renderer_path or default.get(
+        "js_renderer_path"
+    )
+
     # Set the rest of the frame properties
     config["frame_height"] = 8.0
     config["frame_width"] = (
