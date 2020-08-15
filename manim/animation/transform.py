@@ -285,7 +285,7 @@ class TransformAnimations(Transform):
         else:
             self.run_time = max(start_anim.run_time, end_anim.run_time)
         for anim in start_anim, end_anim:
-            anim.set_run_time(self.run_time)
+            anim.run_time = self.run_time
 
         if (
             start_anim.starting_mobject.get_num_points()

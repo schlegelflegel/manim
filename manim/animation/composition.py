@@ -74,7 +74,7 @@ class AnimationGroup(Animation):
         curr_time = 0
         for anim in self.animations:
             start_time = curr_time
-            end_time = start_time + anim.get_run_time()
+            end_time = start_time + anim.run_time
             self.anims_with_timings.append((anim, start_time, end_time))
             # Start time of next animation is based on
             # the lag_ratio

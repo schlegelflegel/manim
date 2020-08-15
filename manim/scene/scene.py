@@ -715,9 +715,9 @@ class Scene(Container):
         ------
         float
             The total run_time of all of the animations in the list.
-        """
 
-        return np.max([animation.run_time for animation in animations])
+        """
+        return max(a.run_time for a in animations)
 
     def get_animation_time_progression(self, animations):
         """
@@ -744,7 +744,7 @@ class Scene(Container):
         time_progression.set_description(
             "".join(
                 [
-                    "Animation {}: ".format(self.num_plays),
+                    f"Animation {self.num_plays}: ",
                     str(animations[0]),
                     (", etc." if len(animations) > 1 else ""),
                 ]

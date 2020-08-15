@@ -1,3 +1,7 @@
+"""
+Base class for all animations.
+"""
+
 from copy import deepcopy
 
 import numpy as np
@@ -6,12 +10,22 @@ from ..mobject.mobject import Mobject
 from ..utils.config_ops import digest_config
 from ..utils.rate_functions import smooth
 
-
 DEFAULT_ANIMATION_RUN_TIME = 1.0
 DEFAULT_ANIMATION_LAG_RATIO = 0
 
 
-class Animation(object):
+class Animation:
+    """Base class for animating Mobjects.
+
+    Parameters
+    ----------
+    mobject : :class:`~.Mobject`
+        The mobject to be animated.
+    kwargs : :class:`dict`
+        Arguments to be consumed by :func:`~digest_config`.
+
+    """
+
     CONFIG = {
         "run_time": DEFAULT_ANIMATION_RUN_TIME,
         "rate_func": smooth,
@@ -38,10 +52,18 @@ class Animation(object):
         return self.__class__.__name__ + str(self.mobject)
 
     def begin(self):
-        # This is called right as an animation is being
-        # played.  As much initialization as possible,
-        # especially any mobject copying, should live in
-        # this method
+        """Start the animation.
+
+        Notes
+        -----
+        This is called internally by manim when rendering a Scene.
+
+        See Also
+        --------
+        :func:`~finish`
+        """
+        # Perform here as much initialization as possible, especially any
+        # mobject copying.
         self.starting_mobject = self.create_starting_mobject()
         if self.suspend_mobject_updating:
             # All calls to self.mobject's internal updaters
@@ -54,62 +76,139 @@ class Animation(object):
         self.interpolate(0)
 
     def finish(self):
+        """End the animation.
+
+        Notes
+        -----
+        This is called internally by manim when rendering a Scene.
+
+        See Also
+        --------
+        :func:`~begin`
+        """
         self.interpolate(1)
         if self.suspend_mobject_updating:
             self.mobject.resume_updating()
 
     def clean_up_from_scene(self, scene):
-        if self.is_remover():
+        """Perform clean up, usually after the animation has finished.
+
+        Notes
+        -----
+        This is called internally by manim when rendering a Scene.
+
+        Parameters
+        ----------
+        scene : :class:`~.Scene`
+            The scene that is rendering this animation.
+
+        """
+        if self.remover:
             scene.remove(self.mobject)
 
     def create_starting_mobject(self):
-        # Keep track of where the mobject starts
+        """Create a Mobject that represents the initial state of the animation.
+
+        Returns
+        -------
+        :class:`tuple`
+            The mobjects.
+        """
         return self.mobject.copy()
 
     def get_all_mobjects(self):
-        """
-        Ordering must match the ording of arguments to interpolate_submobject
+        """Return all mobjects handled by this animation.
+
+        Returns
+        -------
+        :class:`tuple`
+            The mobjects.
+
+        Notes
+        -----
+        Ordering of the returned tuple must match the ordering of arguments to
+        :func:`~interpolate_submobject`.
+
+        See Also
+        --------
+        :func:`~interpolate_submobject`
         """
         return self.mobject, self.starting_mobject
 
     def get_all_families_zipped(self):
+        """Zip all of the mobjects' families.
+
+        Returns
+        -------
+        :class:`zip`
+            All of the mobjects handled by this animation, zipped.
+
+        """
         return zip(
             *[mob.family_members_with_points() for mob in self.get_all_mobjects()]
         )
 
     def update_mobjects(self, dt):
-        """
-        Updates things like starting_mobject, and (for
-        Transforms) target_mobject.  Note, since typically
-        (always?) self.mobject will have its updating
-        suspended during the animation, this will do
-        nothing to self.mobject.
-        """
-        for mob in self.get_all_mobjects_to_update():
-            mob.update(dt)
+        """Update each mobject in self.get_all_mobjects().
 
-    def get_all_mobjects_to_update(self):
-        # The surrounding scene typically handles
-        # updating of self.mobject.  Besides, in
-        # most cases its updating is suspended anyway
-        return list(filter(lambda m: m is not self.mobject, self.get_all_mobjects()))
+        Parameters
+        ----------
+        dt : `float`
+            The fraction of the animation that has transpired, to be passed on
+            to each Mobject's update function.
+
+        Notes
+        -----
+        Typically, self.mobject will have its updating suspended during the
+        animation, so this function does not update it.
+
+        See Also
+        --------
+        :func:`~get_all_mobjects`, :func:`~Mobject.update`
+
+        """
+        # The surrounding scene typically handles updating of self.mobject
+        for mob in self.get_all_mobjects():
+            if mob is not self.mobject:
+                mob.update(dt)
 
     def copy(self):
+        """Return a deepcopy of the animation.
+
+        Returns
+        -------
+        :class:`~Animation`
+            A copy of this animation.
+
+        """
         return deepcopy(self)
 
     def update_config(self, **kwargs):
         digest_config(self, kwargs)
         return self
 
-    # Methods for interpolation, the mean of an Animation
     def interpolate(self, alpha):
-        alpha = np.clip(alpha, 0, 1)
-        self.interpolate_mobject(self.rate_func(alpha))
+        """Interpolate mobjects by evaluating the rate function at alpha.
+
+        Parameters
+        ----------
+        alpha : :float:
+            The time at which the rate function will be evaluated.
+
+        See Also
+        --------
+        :func:`~interpolate_mobject`
+
+        """
+        self.interpolate_mobject(self.rate_func(np.clip(alpha, 0, 1)))
 
     def update(self, alpha):
-        """
-        This method shouldn't exist, but it's here to
-        keep many old scenes from breaking
+        """Kept for backwards compatibility.
+
+        .. deprecated:: 0.0.1
+          `update` will be removed in manim-ce 1.0.0, it is replaced by
+          :func:`~interpolate`.
+
         """
         self.interpolate(alpha)
 
@@ -132,25 +231,3 @@ class Animation(object):
         value = alpha * full_length
         lower = index * lag_ratio
         return np.clip((value - lower), 0, 1)
-
-    # Getters and setters
-    def set_run_time(self, run_time):
-        self.run_time = run_time
-        return self
-
-    def get_run_time(self):
-        return self.run_time
-
-    def set_rate_func(self, rate_func):
-        self.rate_func = rate_func
-        return self
-
-    def get_rate_func(self):
-        return self.rate_func
-
-    def set_name(self, name):
-        self.name = name
-        return self
-
-    def is_remover(self):
-        return self.remover
