@@ -82,4 +82,4 @@ from .utils.strings import *
 from .utils.tex import *
 
 # Custom theme
-from theme import *
+from .theme import *
