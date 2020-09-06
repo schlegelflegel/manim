@@ -36,3 +36,4 @@ THEME = {
     "CYAN_DARK": "#007563",
     "DARK": "#012523",
 }
+locals().update(THEME)
