@@ -80,6 +80,3 @@ from .utils.sounds import *
 from .utils.space_ops import *
 from .utils.strings import *
 from .utils.tex import *
-
-# Custom theme
-from .theme import *

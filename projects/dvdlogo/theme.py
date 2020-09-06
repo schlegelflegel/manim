@@ -1,4 +1,4 @@
-THEME_COLORS = {
+""" THEME_COLORS = {
     "WHITE": "#EBF2FA",
     "GRAY_DARKER": "#C5CDD6",
     "GRAY_DARK": "#9EA8B1",
@@ -27,4 +27,12 @@ THEME_COLORS = {
     "BLUE_DARK": "#356281",
     "BLUE_DARKER": "#284961"
 }
-globals().update(THEME_COLORS)
+globals().update(THEME_COLORS) """
+
+THEME = {
+    "ORANGE": "#ffa001",
+    "ORANGE_DARK": "#fc7400",
+    "CYAN": "#00b49d",
+    "CYAN_DARK": "#007563",
+    "DARK": "#012523",
+}
