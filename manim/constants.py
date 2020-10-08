@@ -171,7 +171,7 @@ COLOR_MAP = {
     "PINK": "#D147BD",
     "LIGHT_PINK": "#DC75CD",
     "GREEN_SCREEN": "#00FF00",
-    "ORANGE": "#FF862F"
+    "ORANGE": "#FF862F",
 }
 COLOR_MAP.update(
     {
